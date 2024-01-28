@@ -26,6 +26,9 @@ jobs:
           alias: ${{ secrets.KEY_ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PWD }}
           keyPassword: ${{ secrets.KEY_PWD }}
+        env:
+          # override default build-tools version (29.0.3) -- optional
+          BUILD_TOOLS_VERSION: "30.0.2"
       - name: rename-apk
         run: |
           mv extension-app/build/outputs/apk/release/extension-app-release-unsigned-signed.apk extension-app-${{ github.ref_name }}.apk
