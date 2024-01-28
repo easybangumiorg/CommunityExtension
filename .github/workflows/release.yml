@@ -21,14 +21,14 @@ jobs:
       - name: sign-apk
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: app/build/outputs/apk/release
+          releaseDirectory: extension-app/build/outputs/apk/release
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
           alias: ${{ secrets.KEY_ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PWD }}
           keyPassword: ${{ secrets.KEY_PWD }}
       - name: rename-apk
         run: |
-          mv app/build/outputs/apk/release/extension-app-release-unsigned-signed.apk extension-app-${{ github.ref_name }}.apk
+          mv extension-app/build/outputs/apk/release/extension-app-release-unsigned-signed.apk extension-app-${{ github.ref_name }}.apk
       - name: Release
         run: |
           gh release create -d ${{ github.ref_name }} extension-app-${{ github.ref_name }}.apk
