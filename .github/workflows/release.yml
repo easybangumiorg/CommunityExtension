@@ -17,7 +17,7 @@ jobs:
       - name: Build
         run: |
           chmod +x ./gradlew
-          ./gradlew :app:assemble
+          ./gradlew :extension-app:assemble
       - name: sign-apk
         uses: r0adkll/sign-android-release@v1
         with:
