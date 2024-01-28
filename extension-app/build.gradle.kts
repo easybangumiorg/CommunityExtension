@@ -4,10 +4,10 @@ plugins {
 }
 
 // 包名
-val packageName = ""
+val packageName = "org.easybangumi.extension"
 
 // 库版本，目前 5.0.3 支持的库版本为 3 到 5
-val extensionLibVersion = 5
+val extensionLibVersion = 6
 
 android {
     namespace = packageName
@@ -20,7 +20,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        manifestPlaceholders.put("extensionLibVersion", 4)
+        manifestPlaceholders.put("extensionLibVersion", extensionLibVersion)
 
     }
 
@@ -45,5 +45,6 @@ android {
 
 
 dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     compileOnly("io.github.easybangumiorg:extension-api:1.${extensionLibVersion}-SNAPSHOT")
 }

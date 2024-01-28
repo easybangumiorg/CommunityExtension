@@ -1,0 +1,36 @@
+name: release
+on:
+  push:
+    tags:
+      - '**'
+  workflow_dispatch:
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.5.2
+      - name: Setup Java JDK
+        uses: actions/setup-java@v1.4.4
+        with:
+          java-version: 17
+      - name: Build
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :app:assemble
+      - name: sign-apk
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PWD }}
+          keyPassword: ${{ secrets.KEY_PWD }}
+      - name: rename-apk
+        run: |
+          mv app/build/outputs/apk/release/extension-app-release-unsigned-signed.apk extension-app-${{ github.ref_name }}.apk
+      - name: Release
+        run: |
+          gh release create -d ${{ github.ref_name }} extension-app-${{ github.ref_name }}.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
