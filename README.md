@@ -1,8 +1,8 @@
 ![纯纯看番本体番剧源](./headline.png)  
 
 <p align="center">
-  <img alt="release" src="https://img.shields.io/github/v/release/easybangumiorg/EasyBangumiExtension" />
-  <img alt="license" src="https://img.shields.io/github/license/easybangumiorg/EasyBangumiExtension" />
+  <img alt="release" src="https://img.shields.io/github/v/release/easybangumiorg/CommunityExtension" />
+  <img alt="license" src="https://img.shields.io/github/license/easybangumiorg/CommunityExtension" />
 </p>
 
 本仓库内容均来自互联网投稿，为了代码安全性只收录提交到纯纯看番官方的代码，并由官方编译。
