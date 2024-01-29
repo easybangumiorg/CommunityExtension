@@ -7,6 +7,7 @@ import com.heyanle.easybangumi_extension.anim.AnimOneSource
 import com.heyanle.easybangumi_extension.ggl.GGLSource
 import io.github.easybangumiorg.source.aio.auete.AueteSource
 import io.github.easybangumiorg.source.aio.fengche.FengCheSource
+import io.github.easybangumiorg.source.aio.libvio.LibVioSource
 import io.github.easybangumiorg.source.aio.xigua.XiguaSource
 import io.github.peacefulprogram.easybangumi_mikudm.MikudmApiSource
 import io.github.peacefulprogram.easybangumi_mxdm.MxdmApiSource
@@ -22,6 +23,7 @@ class EasySourceFactory: SourceFactory {
     override fun create(): List<Source> {
         return listOf(
             AnimOneSource(),
+            LibVioSource(),
             AueteSource(),
             FengCheSource(),
             XiguaSource(),
