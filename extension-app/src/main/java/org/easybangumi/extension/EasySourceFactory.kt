@@ -6,6 +6,7 @@ import com.heyanle.easybangumi_extension.anfun.AnfunSource
 import com.heyanle.easybangumi_extension.anim.AnimOneSource
 import com.heyanle.easybangumi_extension.ggl.GGLSource
 import io.github.easybangumiorg.source.aio.auete.AueteSource
+import io.github.easybangumiorg.source.aio.changzhang.ChangZhangSource
 import io.github.easybangumiorg.source.aio.fengche.FengCheSource
 import io.github.easybangumiorg.source.aio.libvio.LibVioSource
 import io.github.easybangumiorg.source.aio.xigua.XiguaSource
@@ -31,7 +32,8 @@ class EasySourceFactory: SourceFactory {
             MxdmApiSource(),
             NivodApiSource(),
             GGLSource(),
-            AnfunSource()
+            AnfunSource(),
+            ChangZhangSource(),
         )
     }
 }
