@@ -23,35 +23,33 @@ class FengCheDetail : ComponentWrapper(), DetailedComponent {
                 url("$FengCheBaseUrl/video/${summary.id}.html")
             }.asDocument()
             val imageUrl =
-                document.selectFirst(".myui-vodlist__thumb img")!!.dataset()["original"]!!
-            val detailContainer = document.selectFirst(".myui-content__detail")!!
-            val title = detailContainer.selectFirst(".title")!!.text().trim()
-            val currentEpisode =
-                document.selectFirst("div.myui-content__thumb  pic-text.text-right")?.text()?.trim()
-                    ?: ""
-            val infoList = detailContainer.getElementsByClass("data").map { it.text().trim() }.run {
-                if (currentEpisode.isEmpty()) {
-                    this
-                } else {
-                    listOf(currentEpisode) + this
-                }
-            }
-            val desc = detailContainer.selectFirst(".desc .sketch")?.text()?.trim() ?: ""
-            val playlistNames =
-                document.selectFirst("ul.nav-tabs")?.children()?.map { it.text().trim() }
-                    ?: emptyList()
-            val episodesGroup = document.select(".tab-content > .tab-pane").asSequence()
-                .filter { it.id().startsWith("playlist") }
-                .map { epContainer ->
-                    epContainer.select("a").map {
-                        Episode(
-                            id = it.attr("href").extractFengCheIdFromUrl(),
-                            label = it.text().trim(),
-                            order = 1
-                        )
+                document.selectFirst(".con_c1 .img_wrapper")!!.dataset()["original"]!!
+            val detailContainer = document.selectFirst(".con_xinxi")!!
+            val title = detailContainer.selectFirst("a")!!.text().trim()
+            val intro = detailContainer.selectFirst(".yplx_c1")!!.children()
+                .find { it.text().contains("类型：") }
+                ?.children()
+                ?.lastOrNull()
+                ?.text()
+                ?.trim()
+                ?: ""
+            val desc = detailContainer.selectFirst(".yplx_c3")?.children()
+                ?.lastOrNull()
+                ?.text()
+                ?.trim()
+            val playlistNames = document.select(".playlist-tab a").map { it.text().trim() }
+            val episodesGroup =
+                document.select(".con_juji_bg > .tab-content > .con_c2_list").asSequence()
+                    .map { epContainer ->
+                        epContainer.select("a").map {
+                            Episode(
+                                id = it.attr("href").extractFengCheIdFromUrl(),
+                                label = it.text().trim(),
+                                order = 1
+                            )
+                        }
                     }
-                }
-                .toList()
+                    .toList()
             val playlists = List(playlistNames.size.coerceAtMost(episodesGroup.size)) {
                 PlayLine(
                     id = it.toString(),
@@ -66,7 +64,7 @@ class FengCheDetail : ComponentWrapper(), DetailedComponent {
                 title = title,
                 coverUrl = imageUrl,
                 description = desc,
-                intro = infoList.joinToString(" ")
+                intro = intro
             )
             cartoon to playlists
         }

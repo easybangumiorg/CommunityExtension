@@ -4,6 +4,8 @@ import com.heyanle.easybangumi4.source_api.component.ComponentWrapper
 import com.heyanle.easybangumi4.source_api.component.page.PageComponent
 import com.heyanle.easybangumi4.source_api.component.page.SourcePage
 import com.heyanle.easybangumi4.source_api.entity.CartoonCover
+import com.heyanle.easybangumi4.source_api.entity.CartoonCoverImpl
+import com.heyanle.easybangumi4.source_api.utils.api.OkhttpHelper
 import com.heyanle.easybangumi4.source_api.withResult
 import io.github.easybangumiorg.source.aio.asDocument
 import io.github.easybangumiorg.source.aio.commonHttpClient
@@ -13,7 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-class FengChePage : ComponentWrapper(), PageComponent {
+class FengChePage(val okhttpHelper: OkhttpHelper) : ComponentWrapper(), PageComponent {
 
     private val categoryLock = Mutex()
 
@@ -22,34 +24,25 @@ class FengChePage : ComponentWrapper(), PageComponent {
     override fun getPages(): List<SourcePage> {
         val home = SourcePage.Group("首页", false) {
             withResult(Dispatchers.IO) {
-                val document = commonHttpClient.newGetRequest {
+                val document = okhttpHelper.client.newGetRequest {
                     url(FengCheBaseUrl)
                 }.asDocument()
                 val pages = mutableListOf<SourcePage.SingleCartoonPage>()
-                document.selectFirst(".flickity-slider")?.let { container ->
-                    val videos =
-                        container.getElementsByClass("myui-vodlist__box")
-                            .map { it.parseFengCheAnime(source.key) }
+                document.select("body > div.wrapper").forEach { wrapperEl ->
+                    val videoEls = wrapperEl.select(".picList > li")
+                        .takeIf { it.isNotEmpty() }
+                        ?: wrapperEl.select(".c2_list > li")
+                    val title = wrapperEl.selectFirst(".cont_title")
+                        ?: wrapperEl.selectFirst(".title > .t_head")
+                    title ?: return@forEach
+                    val videos = videoEls.map { it.parseFengCheAnime(source.key)}
                     if (videos.isNotEmpty()) {
-                        val page = SourcePage.SingleCartoonPage.WithCover("热门推荐", { 0 }) {
-                            withResult {
-                                null to videos
+                        val page =
+                            SourcePage.SingleCartoonPage.WithCover(title.text().trim(), { 0 }) {
+                                withResult {
+                                    null to videos
+                                }
                             }
-                        }
-                        pages.add(page)
-                    }
-                }
-                document.getElementsByClass("myui-panel").forEach { panelEl ->
-                    val videos =
-                        panelEl.getElementsByClass("myui-vodlist__box")
-                            .map { it.parseFengCheAnime(source.key) }
-                    if (videos.isNotEmpty()) {
-                        val page = SourcePage.SingleCartoonPage.WithCover(
-                            panelEl.selectFirst(".title")!!.text(), { 0 }) {
-                            withResult {
-                                null to videos
-                            }
-                        }
                         pages.add(page)
                     }
                 }
@@ -85,11 +78,11 @@ class FengChePage : ComponentWrapper(), PageComponent {
         category: String,
         page: Int
     ): Pair<Int?, List<CartoonCover>> {
-        val pageUrl = "$FengCheBaseUrl/show/$typeKey---${category.encodeUri()}-----$page---.html"
-        val document = commonHttpClient.newGetRequest {
+        val pageUrl = "$FengCheBaseUrl/show/$typeKey---$category-----$page---.html"
+        val document = okhttpHelper.client.newGetRequest {
             url(pageUrl)
         }.asDocument()
-        val videos = document.getElementsByClass("myui-vodlist__box")
+        val videos = document.select(".wrapper > .culum_con > .c2_list > li")
             .map { it.parseFengCheAnime(source.key) }
         val nextPage = if (document.hasNextPage()) page + 1 else null
         return nextPage to videos
@@ -108,11 +101,11 @@ class FengChePage : ComponentWrapper(), PageComponent {
     }
 
     private fun requestVideoCategories(): List<VideoCategory> {
-        val document = commonHttpClient.newGetRequest {
+        val document = okhttpHelper.client.newGetRequest {
             url("$FengCheBaseUrl/type/ribendongman.html")
         }.asDocument()
         val row =
-            document.select(".container .row .myui-panel_bd ul.myui-screen__list.nav-slide")[1]
+            document.select("body > div.wrapper.culum_list > div.conx.star_bot > div > div")[1]
         val ignoreKey = "ribendongman"
         val linkList = row.getElementsByTag("a")
         val valueIndex = linkList.last()!!.attr("href").run {
@@ -121,8 +114,7 @@ class FengChePage : ComponentWrapper(), PageComponent {
             .split('-')
             .indexOfFirst { it.isNotEmpty() && it != ignoreKey }
         // 忽略第一个
-        val categories = List(linkList.size - 1) {
-            val el = linkList[it + 1]
+        val categories = linkList.map {el->
             val value = el.attr("href").run {
                 substring(lastIndexOf('/') + 1, lastIndexOf('.'))
             }

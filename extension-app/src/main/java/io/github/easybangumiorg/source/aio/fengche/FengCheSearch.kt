@@ -4,6 +4,7 @@ import com.heyanle.easybangumi4.source_api.SourceResult
 import com.heyanle.easybangumi4.source_api.component.ComponentWrapper
 import com.heyanle.easybangumi4.source_api.component.search.SearchComponent
 import com.heyanle.easybangumi4.source_api.entity.CartoonCover
+import com.heyanle.easybangumi4.source_api.entity.CartoonCoverImpl
 import com.heyanle.easybangumi4.source_api.withResult
 import io.github.easybangumiorg.source.aio.asDocument
 import io.github.easybangumiorg.source.aio.commonHttpClient
@@ -23,10 +24,19 @@ class FengCheSearch : ComponentWrapper(), SearchComponent {
             url("$FengCheBaseUrl/search/${keyword.encodeUri()}----------$pageKey---.html")
         }.asDocument()
         val videos =
-            document.getElementById("searchList")?.children()
-                ?.map { it.parseFengCheAnime(source.key) }
-                ?: emptyList()
-        val nextPage = if (document.hasNextPage()) pageKey + 1 else null
+            document.select(".sear_con > .reusltbox").map { box->
+                    val link = box.selectFirst("a")!!.absUrl("href")
+                    val img = box.selectFirst(".img_wrapper")?.dataset()?.get("original")
+                    val title = box.selectFirst(".result_title > a")!!.text().trim()
+                    CartoonCoverImpl(
+                        id = link.extractFengCheIdFromUrl(),
+                        source = source.key,
+                        url = link,
+                        title = title,
+                        coverUrl = img
+                    )
+                }
+        val nextPage = if (document.hasNextPage() && videos.isNotEmpty()) pageKey + 1 else null
         nextPage to videos
     }
 

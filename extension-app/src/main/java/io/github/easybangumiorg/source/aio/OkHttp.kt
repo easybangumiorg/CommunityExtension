@@ -1,5 +1,6 @@
 package io.github.easybangumiorg.source.aio
 
+import android.util.Log
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -16,6 +17,7 @@ val json = Json {
 val commonHttpClient = OkHttpClient.Builder()
     .addInterceptor {
         val req = it.request()
+        Log.d("CommonOkHttpClient", req.url.toString())
         val builder = req.newBuilder()
         if (req.header("user-agent")?.isNotEmpty() != true) {
             builder.header(

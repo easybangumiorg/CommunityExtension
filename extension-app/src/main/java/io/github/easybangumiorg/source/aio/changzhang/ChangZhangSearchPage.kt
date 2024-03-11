@@ -16,6 +16,9 @@ import okhttp3.Cookie
 import okhttp3.FormBody
 
 class ChangZhangSearchPage(private val okhttpHelper: OkhttpHelper):SearchComponent,ComponentWrapper() {
+
+    var searchUrl:String? = null
+
     override fun getFirstSearchKey(keyword: String): Int {
         return 1
     }
@@ -24,8 +27,17 @@ class ChangZhangSearchPage(private val okhttpHelper: OkhttpHelper):SearchCompone
         pageKey: Int,
         keyword: String
     ): SourceResult<Pair<Int?, List<CartoonCover>>> = withIoResult{
+        if (searchUrl == null) {
+            searchUrl = okhttpHelper.client.newGetRequest {
+                url(ChangZhangSource.BASE_URL)
+            }
+                .asDocument()
+                .selectFirst(".w-search-form")
+                ?.attr("action")
+                ?: throw RuntimeException("未获取到搜索视频链接")
+        }
         val doc = okhttpHelper.cloudflareClient.newGetRequest {
-            url("${ChangZhangSource.BASE_URL}/xssearch?q=${keyword.encodeUri()}&f=_all&p=$pageKey")
+            url("$searchUrl?q=${keyword.encodeUri()}&f=_all&p=$pageKey")
         }.use { resp ->
             val respDoc = resp.asDocument()
             if (respDoc.title().contains("人机验证")) {

@@ -1,5 +1,6 @@
 package io.github.easybangumiorg.source.aio.libvio
 
+import android.util.Log
 import com.google.gson.Gson
 import com.heyanle.easybangumi4.source_api.SourceResult
 import com.heyanle.easybangumi4.source_api.component.ComponentWrapper
@@ -13,6 +14,7 @@ import io.github.easybangumiorg.source.aio.decodeUri
 import io.github.easybangumiorg.source.aio.encodeUri
 import io.github.easybangumiorg.source.aio.newGetRequest
 import io.github.easybangumiorg.source.aio.withIoResult
+import java.net.URI
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -59,8 +61,12 @@ class LibVioPlay(private val libVioSource: LibVioSource) : ComponentWrapper(), P
                 url("${LibVioSource.BASE_URL}/static/player/${playFrom}.js?v=3.5")
             }.bodyString()
             playerServer = parseServerFromJs(jsContent)
+            if (!playerServer.startsWith("http:") && !playerServer.startsWith("https")) {
+                playerServer = LibVioSource.BASE_URL + playerServer
+            }
             playerServerCache[playFrom] = playerServer
         }
+        Log.d(TAG, "getPlayInfo: $playerServer")
         val playerHtml =
             libVioSource.httpClient.newGetRequest {
                 url("$playerServer?url=$data&next=$nextLink&id=${summary.id}&nid=${cfg["nid"]}")
@@ -131,4 +137,7 @@ class LibVioPlay(private val libVioSource: LibVioSource) : ComponentWrapper(), P
         return null
     }
 
+    companion object{
+        private const val TAG = "LibVioPlay"
+    }
 }

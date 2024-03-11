@@ -67,30 +67,18 @@ fun String.extractFengCheIdFromUrl() =
 
 
 fun Document.hasNextPage(): Boolean =
-    this.selectFirst(".myui-page")?.getElementsByTag("a")
-        ?.asSequence()
-        ?.filter { it.attr("href").isNotBlank() }
-        ?.toList()
-        ?.run {
-            indexOfLast { it.hasClass("btn-warm") } < size - 3
-        } ?: false
+    this.getElementById("aapages")
+        ?.children()
+        ?.findLast { it.hasClass("pagenow") }
+        ?.nextElementSibling()
+        ?.tagName() === "a"
 
 fun Element.parseFengCheAnime(sourceKey: String): CartoonCover {
     val linkEl = selectFirst("a")!!
     val url = linkEl.absUrl("href")
-    val imageUrl = linkEl.dataset()["original"] ?: linkEl.attr("style").run {
-        val openBracketIndex = indexOf('(', indexOf("url"))
-        val closeBracketIndex = indexOf(')', openBracketIndex)
-        try {
-            substring(openBracketIndex + 1, closeBracketIndex).trim()
-        } catch (ex: Exception) {
-            ""
-        }
-    }
+    val imageUrl = selectFirst(".img_wrapper")?.dataset()?.get("original")
     val episode = linkEl.children().last()?.text()?.trim() ?: ""
-    val title =
-        selectFirst(".myui-vodlist__detail .title")?.text()?.trim() ?: linkEl.attr("title")
-            .trim()
+    val title = linkEl.attr("title").takeIf { it.isNotEmpty() }?: linkEl.text().trim()
     return CartoonCoverImpl(
         id = url.extractFengCheIdFromUrl(),
         url = url,

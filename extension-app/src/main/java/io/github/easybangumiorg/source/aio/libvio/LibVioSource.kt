@@ -230,6 +230,6 @@ class LibVioSource : Source,
 
         private const val TAG = "LibVioSource"
 
-        const val BASE_URL = "https://www.libvio.vip"
+        const val BASE_URL = "https://www.libvio.fun"
     }
 }
