@@ -12,7 +12,8 @@ import org.jsoup.Jsoup
 import java.net.URLEncoder
 
 class MxdmSearchComponent(
-    private val okhttpHelper: OkhttpHelper
+    private val okhttpHelper: OkhttpHelper,
+    private val mxdmUtil: MxdmUtil
 ) : ComponentWrapper(), SearchComponent {
     override fun getFirstSearchKey(keyword: String): Int = 1
 
@@ -22,27 +23,27 @@ class MxdmSearchComponent(
     ): SourceResult<Pair<Int?, List<CartoonCover>>> = withResult(Dispatchers.IO) {
         val document =
             Jsoup.parse(
-                MxdmUtil.getDocument(okhttpHelper, "/search/${encodeUrlComponent(keyword)}----------$pageKey---.html"),
-                MxdmUtil.BASE_URL
+                mxdmUtil.getDocument( "/search/${encodeUrlComponent(keyword)}----------$pageKey---.html"),
+                mxdmUtil.baseUrl
             )
         val videos = document.select(".module-search-item").map { videoElement ->
             val link = videoElement.selectFirst("a")!!
             val url = link.absUrl("href")
             val videoTitle = videoElement.selectFirst("h3")!!.text()
-            val coverUrl = MxdmUtil.extractImageSrc(videoElement.selectFirst("img")!!)
+            val coverUrl = mxdmUtil.extractImageSrc(videoElement.selectFirst("img")!!)
             val desc = videoElement.select(".video-info-item").last()?.text()
             val videoId = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))
             CartoonCoverImpl(
                 id = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.')),
                 source = source.key,
-                url = "${MxdmUtil.BASE_URL}/dongman/$videoId.html",
+                url = "${mxdmUtil.baseUrl}/dongman/$videoId.html",
                 title = videoTitle,
                 intro = desc,
                 coverUrl = coverUrl
             )
         }
         val nextPage =
-            if (MxdmUtil.hasNextPage(document) && videos.isNotEmpty()) pageKey + 1 else null
+            if (mxdmUtil.hasNextPage(document) && videos.isNotEmpty()) pageKey + 1 else null
         nextPage to videos
     }
 

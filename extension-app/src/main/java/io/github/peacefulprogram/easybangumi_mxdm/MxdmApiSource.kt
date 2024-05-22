@@ -12,9 +12,9 @@ class MxdmApiSource : Source, ExtensionIconSource {
     override val label: String
         get() = "MX动漫"
     override val version: String
-        get() = "1.0"
+        get() = "1.1"
     override val versionCode: Int
-        get() = 1
+        get() = 2
 
     override fun getIconResourcesId(): Int = R.drawable.mxdm
 
@@ -27,6 +27,8 @@ class MxdmApiSource : Source, ExtensionIconSource {
             MxdmSearchComponent::class,
             MxdmDetailComponent::class,
             MxdmPlayComponent::class,
+            MxdmPreferenceComponent::class,
+            MxdmUtil::class
         )
     }
 }

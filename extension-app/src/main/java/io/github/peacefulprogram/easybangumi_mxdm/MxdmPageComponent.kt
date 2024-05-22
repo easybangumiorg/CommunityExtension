@@ -14,19 +14,20 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
 class MxdmPageComponent(
-    private val okhttpHelper: OkhttpHelper
+    private val okhttpHelper: OkhttpHelper,
+    private val mxdmUtil: MxdmUtil
 ) : ComponentWrapper(), PageComponent {
     override fun getPages(): List<SourcePage> {
         val pages = mutableListOf<SourcePage>()
         val homePage = SourcePage.Group("首页", false) {
             withResult(Dispatchers.IO) {
-                parseHomePage(Jsoup.parse(MxdmUtil.getDocument(okhttpHelper, "/"), MxdmUtil.BASE_URL))
+                parseHomePage(Jsoup.parse(mxdmUtil.getDocument( "/"), mxdmUtil.baseUrl))
             }
         }
         pages.add(homePage)
         val timeline = SourcePage.Group("更新时间表", false) {
             withResult(Dispatchers.IO) {
-                parseTimeLine(Jsoup.parse(MxdmUtil.getDocument(okhttpHelper, "/"), MxdmUtil.BASE_URL))
+                parseTimeLine(Jsoup.parse(mxdmUtil.getDocument("/"), mxdmUtil.baseUrl))
             }
         }
         pages.add(timeline)
@@ -50,11 +51,11 @@ class MxdmPageComponent(
 
     private fun buildPageOfType(typeId: String, page: Int): Pair<Int?, List<CartoonCover>> {
         val document = Jsoup.parse(
-            MxdmUtil.getDocument(okhttpHelper, "/show/${typeId}--------${page}---.html"),
-            MxdmUtil.BASE_URL
+            mxdmUtil.getDocument("/show/${typeId}--------${page}---.html"),
+            mxdmUtil.baseUrl
         )
         val videos = document.select(".content .module .module-item").map { it.parseToCartoon() }
-        val nextPage = if (MxdmUtil.hasNextPage(document) && videos.isNotEmpty()) page + 1 else null
+        val nextPage = if (mxdmUtil.hasNextPage(document) && videos.isNotEmpty()) page + 1 else null
         return nextPage to videos
     }
 
@@ -78,7 +79,7 @@ class MxdmPageComponent(
                 CartoonCoverImpl(
                     id = videoId,
                     source = source.key,
-                    url = "${MxdmUtil.BASE_URL}/dongman/$videoId.html",
+                    url = "${mxdmUtil.baseUrl}/dongman/$videoId.html",
                     title = title,
                     intro = episodeText
                 )
@@ -130,7 +131,7 @@ class MxdmPageComponent(
     }
 
     private fun Element.parseToCartoon(): CartoonCover {
-        val coverUrl = MxdmUtil.extractImageSrc(this.selectFirst("img")!!)
+        val coverUrl = mxdmUtil.extractImageSrc(this.selectFirst("img")!!)
         val linkEl = this.selectFirst("a")!!
         val url = linkEl.absUrl("href")
         val id = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'))

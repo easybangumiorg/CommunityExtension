@@ -1,23 +1,28 @@
 package io.github.peacefulprogram.easybangumi_mxdm
 
 import com.heyanle.easybangumi4.source_api.utils.api.OkhttpHelper
+import com.heyanle.easybangumi4.source_api.utils.api.PreferenceHelper
 import okhttp3.Request
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
-object MxdmUtil {
-    val BASE_URL = "http://www.mxdm6.com"
-    val USER_AGENT =
+class MxdmUtil(
+    private val okhttpHelper: OkhttpHelper,
+    private val preferenceHelper: PreferenceHelper
+) {
+    val baseUrl:String
+        get() = preferenceHelper.get("BaseUrl", "https://www.mxdm.tv/")
+    val userAgent =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
 
-    fun getDocument(okhttpHelper: OkhttpHelper, url: String): String {
+    fun getDocument(url: String): String {
         val actualUrl = if (url.startsWith("http")) {
             url
         } else {
-            BASE_URL + url
+            baseUrl + url
         }
         val req = Request.Builder()
-            .header("user-agent", USER_AGENT)
+            .header("user-agent", userAgent)
             .url(actualUrl)
             .get()
             .build()

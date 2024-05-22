@@ -14,7 +14,8 @@ import kotlinx.coroutines.Dispatchers
 import org.jsoup.Jsoup
 
 class MxdmDetailComponent(
-    private val okhttpHelper: OkhttpHelper
+    private val okhttpHelper: OkhttpHelper,
+    private val mxdmUtil: MxdmUtil,
 ) : ComponentWrapper(), DetailedComponent {
     override suspend fun getAll(summary: CartoonSummary): SourceResult<Pair<Cartoon, List<PlayLine>>> =
         withResult(Dispatchers.IO) {
@@ -33,17 +34,17 @@ class MxdmDetailComponent(
 
     private fun getVideoDetail(videoId: String): Pair<Cartoon, List<PlayLine>> {
         val document =
-            Jsoup.parse(MxdmUtil.getDocument(okhttpHelper,"/dongman/$videoId.html"), MxdmUtil.BASE_URL)
+            Jsoup.parse(mxdmUtil.getDocument("/dongman/$videoId.html"), mxdmUtil.baseUrl)
         val videoTitle = document.selectFirst(".page-title")!!.text().trim()
         val tags = document.select(".video-info-aux a").joinToString(", ") { it.text().trim() }
         val desc = document.selectFirst(".video-info-content")?.text()
         val coverUrl = document.selectFirst(".module-item-pic img")?.run {
-            MxdmUtil.extractImageSrc(this)
+            mxdmUtil.extractImageSrc(this)
         }
         val cartoon = CartoonImpl(
             id = videoId,
             source = source.key,
-            url = "${MxdmUtil.BASE_URL}/dongman/$videoId.html",
+            url = "${mxdmUtil.baseUrl}/dongman/$videoId.html",
             title = videoTitle,
             genre = tags,
             coverUrl = coverUrl,

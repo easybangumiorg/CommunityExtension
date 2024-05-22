@@ -17,7 +17,8 @@ import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 class MxdmPlayComponent(
-    private val okhttpHelper: OkhttpHelper
+    private val okhttpHelper: OkhttpHelper,
+    private val mxdmUtil: MxdmUtil,
 ) : ComponentWrapper(), PlayComponent {
     override suspend fun getPlayInfo(
         summary: CartoonSummary,
@@ -25,9 +26,9 @@ class MxdmPlayComponent(
         episode: Episode,
     ): SourceResult<PlayerInfo> = withResult(Dispatchers.IO) {
         val html =
-            MxdmUtil.getDocument(okhttpHelper, "/dongmanplay/${summary.id}-${playLine.id}-${(episode.id.toIntOrNull()?:episode.order) + 1}.html")
+            mxdmUtil.getDocument( "/dongmanplay/${summary.id}-${playLine.id}-${(episode.id.toIntOrNull()?:episode.order) + 1}.html")
         val newHtml =
-            MxdmUtil.getDocument(okhttpHelper, "https://danmu.yhdmjx.com/m3u8.php?url=" + extractPlayerParam(html))
+            mxdmUtil.getDocument( "https://danmu.yhdmjx.com/m3u8.php?url=" + extractPlayerParam(html))
         val btToken = extractBtToken(newHtml)
         val encryptedUrl = extractEncryptedUrl(newHtml)
 
