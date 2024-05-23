@@ -15,7 +15,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-class FengChePage(val okhttpHelper: OkhttpHelper) : ComponentWrapper(), PageComponent {
+class FengChePage(
+    val okhttpHelper: OkhttpHelper,
+    private val hostUrlHelper: FengCheHostUrlHelper
+) : ComponentWrapper(), PageComponent {
 
     private val categoryLock = Mutex()
 
@@ -25,7 +28,7 @@ class FengChePage(val okhttpHelper: OkhttpHelper) : ComponentWrapper(), PageComp
         val home = SourcePage.Group("首页", false) {
             withResult(Dispatchers.IO) {
                 val document = okhttpHelper.client.newGetRequest {
-                    url(FengCheBaseUrl)
+                    url(hostUrlHelper.fengcheBaseUrl)
                 }.asDocument()
                 val pages = mutableListOf<SourcePage.SingleCartoonPage>()
                 document.select("body > div.wrapper").forEach { wrapperEl ->
@@ -78,7 +81,7 @@ class FengChePage(val okhttpHelper: OkhttpHelper) : ComponentWrapper(), PageComp
         category: String,
         page: Int
     ): Pair<Int?, List<CartoonCover>> {
-        val pageUrl = "$FengCheBaseUrl/show/$typeKey---$category-----$page---.html"
+        val pageUrl = "${hostUrlHelper.fengcheBaseUrl}/show/$typeKey---$category-----$page---.html"
         val document = okhttpHelper.client.newGetRequest {
             url(pageUrl)
         }.asDocument()
@@ -102,7 +105,7 @@ class FengChePage(val okhttpHelper: OkhttpHelper) : ComponentWrapper(), PageComp
 
     private fun requestVideoCategories(): List<VideoCategory> {
         val document = okhttpHelper.client.newGetRequest {
-            url("$FengCheBaseUrl/type/ribendongman.html")
+            url("${hostUrlHelper.fengcheBaseUrl}/type/ribendongman.html")
         }.asDocument()
         val row =
             document.select("body > div.wrapper.culum_list > div.conx.star_bot > div > div")[1]

@@ -13,9 +13,9 @@ class FengCheSource : Source, ExtensionIconSource {
     override val label: String
         get() = "风车动漫"
     override val version: String
-        get() = "2.0"
+        get() = "2.1"
     override val versionCode: Int
-        get() = 4
+        get() = 5
 
     override fun getIconResourcesId(): Int = R.drawable.fengche
 
@@ -23,6 +23,8 @@ class FengCheSource : Source, ExtensionIconSource {
         FengChePage::class,
         FengCheDetail::class,
         FengChePlay::class,
-        FengCheSearch::class
+        FengCheSearch::class,
+        FengChePrefer::class,
+        FengCheHostUrlHelper::class
     )
 }

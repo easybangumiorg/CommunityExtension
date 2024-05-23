@@ -16,11 +16,13 @@ import io.github.easybangumiorg.source.aio.map
 import io.github.easybangumiorg.source.aio.newGetRequest
 import kotlinx.coroutines.Dispatchers
 
-class FengCheDetail : ComponentWrapper(), DetailedComponent {
+class FengCheDetail (
+    private val hostUrlHelper: FengCheHostUrlHelper
+): ComponentWrapper(), DetailedComponent {
     override suspend fun getAll(summary: CartoonSummary): SourceResult<Pair<Cartoon, List<PlayLine>>> =
         withResult(Dispatchers.IO) {
             val document = commonHttpClient.newGetRequest {
-                url("$FengCheBaseUrl/video/${summary.id}.html")
+                url("${hostUrlHelper.fengcheBaseUrl}/video/${summary.id}.html")
             }.asDocument()
             val imageUrl =
                 document.selectFirst(".con_c1 .img_wrapper")!!.dataset()["original"]!!
@@ -60,7 +62,7 @@ class FengCheDetail : ComponentWrapper(), DetailedComponent {
             val cartoon = CartoonImpl(
                 id = summary.id,
                 source = source.key,
-                url = "$FengCheBaseUrl/video/${summary.id}.html",
+                url = "${hostUrlHelper.fengcheBaseUrl}/video/${summary.id}.html",
                 title = title,
                 coverUrl = imageUrl,
                 description = desc,

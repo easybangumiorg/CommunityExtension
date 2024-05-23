@@ -7,7 +7,7 @@ plugins {
 val packageName = "org.easybangumi.extension"
 
 // 库版本，目前 5.0.3 支持的库版本为 3 到 5
-val extensionLibVersion = 6
+val extensionLibVersion = 7
 
 android {
     namespace = packageName
@@ -17,8 +17,8 @@ android {
         applicationId = packageName
         minSdk =  21
         targetSdk =  34
-        versionCode = 5
-        versionName = "1.4"
+        versionCode = 6
+        versionName = "1.5"
 
         manifestPlaceholders.put("extensionLibVersion", extensionLibVersion)
 

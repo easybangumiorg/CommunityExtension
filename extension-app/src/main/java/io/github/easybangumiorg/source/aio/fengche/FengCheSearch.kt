@@ -12,7 +12,9 @@ import io.github.easybangumiorg.source.aio.encodeUri
 import io.github.easybangumiorg.source.aio.newGetRequest
 import kotlinx.coroutines.Dispatchers
 
-class FengCheSearch : ComponentWrapper(), SearchComponent {
+class FengCheSearch(
+    private val hostUrlHelper: FengCheHostUrlHelper
+) : ComponentWrapper(), SearchComponent {
 
     override fun getFirstSearchKey(keyword: String): Int = 1
 
@@ -21,7 +23,7 @@ class FengCheSearch : ComponentWrapper(), SearchComponent {
         keyword: String
     ): SourceResult<Pair<Int?, List<CartoonCover>>> = withResult(Dispatchers.IO) {
         val document = commonHttpClient.newGetRequest {
-            url("$FengCheBaseUrl/search/${keyword.encodeUri()}----------$pageKey---.html")
+            url("${hostUrlHelper.fengcheBaseUrl}/search/${keyword.encodeUri()}----------$pageKey---.html")
         }.asDocument()
         val videos =
             document.select(".sear_con > .reusltbox").map { box->

@@ -12,54 +12,48 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 
-private val urlPageUrl = "https://wedm.cc/"
-
-private val baseUrlFallback = "https://www.886dm.tv"
-
-@Volatile
-private var _fengCheBaseUrl: String? = null
-
-val FengCheBaseUrl: String
-    get() = requireFengCheBaseUrl()
-
-private val baseUrlLock = ReentrantLock()
-
-private fun requireFengCheBaseUrl(): String {
-    if (_fengCheBaseUrl == null) {
-        baseUrlLock.withLock {
-            if (_fengCheBaseUrl == null) {
-                _fengCheBaseUrl = runCatching {
-                    requestFengCheBaseUrl()
-                }.onFailure {
-                    Log.e("FengCheSourceCommon", "requireFengCheBaseUrl:${it.message}", it)
-                }
-                    .getOrNull() ?: baseUrlFallback
-            }
-        }
-    }
-    return _fengCheBaseUrl!!
-}
-
-private fun requestFengCheBaseUrl(): String {
-    val doc = commonHttpClient.newGetRequest {
-        url(urlPageUrl)
-    }.asDocument()
-
-    val website = doc.selectFirst(".main .item p")?.text()?.trim()?.let { text ->
-        val colonIndex =
-            text.lastIndexOf('：').takeIf { it >= 0 } ?: text.lastIndexOf(':')
-        if (colonIndex >= 0) {
-            text.substring(colonIndex + 1).trim()
-        } else {
-            null
-        }
-    }
-    return if (website?.isNotBlank() == true) {
-        "https://$website"
-    } else {
-        baseUrlFallback
-    }
-}
+//private val urlPageUrl = "https://wedm.cc/"
+//
+//private val baseUrlFallback = "https://www.886dm.tv"
+//
+//@Volatile
+//private var _fengCheBaseUrl: String? = null
+//
+//val FengCheBaseUrl: String
+//    get() = requireFengCheBaseUrl()
+//
+//private val baseUrlLock = ReentrantLock()
+//
+//private fun requireFengCheBaseUrl(): String {
+//    if (_fengCheBaseUrl == null) {
+//        baseUrlLock.withLock {
+//            if (_fengCheBaseUrl == null) {
+//                _fengCheBaseUrl = runCatching {
+//                    requestFengCheBaseUrl()
+//                }.onFailure {
+//                    Log.e("FengCheSourceCommon", "requireFengCheBaseUrl:${it.message}", it)
+//                }
+//                    .getOrNull() ?: baseUrlFallback
+//            }
+//        }
+//    }
+//    return _fengCheBaseUrl!!
+//}
+//
+//private fun requestFengCheBaseUrl(): String {
+//    val doc = commonHttpClient.newGetRequest {
+//        url(urlPageUrl)
+//    }.asDocument()
+//
+//    val website = doc.selectFirst(".main .speedlist li a i")?.text()?.trim()?.let { text ->
+//        text
+//    }
+//    return if (website?.isNotBlank() == true) {
+//        "https://$website"
+//    } else {
+//        baseUrlFallback
+//    }
+//}
 
 
 fun String.extractFengCheIdFromUrl() =

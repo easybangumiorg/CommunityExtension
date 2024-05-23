@@ -18,7 +18,9 @@ import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
-class FengChePlay : ComponentWrapper(), PlayComponent {
+class FengChePlay(
+    private val hostUrlHelper: FengCheHostUrlHelper
+) : ComponentWrapper(), PlayComponent {
     override suspend fun getPlayInfo(
         summary: CartoonSummary,
         playLine: PlayLine,
@@ -45,7 +47,7 @@ class FengChePlay : ComponentWrapper(), PlayComponent {
 
     private fun extractPlayerParam(episodeId: String): String {
         val html = commonHttpClient.newGetRequest {
-            url("$FengCheBaseUrl/play/$episodeId.html")
+            url("${hostUrlHelper.fengcheBaseUrl}/play/$episodeId.html")
         }.bodyString()
         val startIndex = html.indexOf("player_aaaa")
         val startBracketIndex = html.indexOf('{', startIndex + 1)
