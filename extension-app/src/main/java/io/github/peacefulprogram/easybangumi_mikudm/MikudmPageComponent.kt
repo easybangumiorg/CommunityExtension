@@ -14,13 +14,14 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
 class MikudmPageComponent(
-    private val okhttpHelper: OkhttpHelper
+    private val okhttpHelper: OkhttpHelper,
+    private val mikudmUtil: MikudmUtil,
 ) : ComponentWrapper(), PageComponent {
     override fun getPages(): List<SourcePage> {
         val pages = mutableListOf<SourcePage>()
         val homePage = SourcePage.Group("首页", false) {
             withResult(Dispatchers.IO) {
-                parseHomePage(Jsoup.parse(MikudmUtil.getDocument(okhttpHelper, "/"), MikudmUtil.BASE_URL))
+                parseHomePage(Jsoup.parse(mikudmUtil.getDocument(okhttpHelper, "/"), mikudmUtil.BASE_URL))
             }
         }
         pages.add(homePage)
@@ -43,12 +44,12 @@ class MikudmPageComponent(
 
     private fun buildPageOfType(typeId: Int, page: Int): Pair<Int?, List<CartoonCover>> {
         val document = Jsoup.parse(
-            MikudmUtil.getDocument(okhttpHelper, "/index.php/vod/type/id/$typeId/page/$page.html"),
-            MikudmUtil.BASE_URL
+            mikudmUtil.getDocument(okhttpHelper, "/index.php/vod/type/id/$typeId/page/$page.html"),
+            mikudmUtil.BASE_URL
         )
         val videos = document.select(".vodlist_item").map { it.parseToCartoon() }
         val nextPage =
-            if (MikudmUtil.hasNextPage(document) && videos.isNotEmpty()) page + 1 else null
+            if (mikudmUtil.hasNextPage(document) && videos.isNotEmpty()) page + 1 else null
         return nextPage to videos
     }
 
@@ -74,7 +75,7 @@ class MikudmPageComponent(
     private fun Element.parseToCartoon(): CartoonCover {
         val linkEl = this.selectFirst("a")!!
         val url = linkEl.absUrl("href")
-        val coverUrl = MikudmUtil.extractImageSrc(linkEl)
+        val coverUrl = mikudmUtil.extractImageSrc(linkEl)
         val title = this.selectFirst(".vodlist_title")!!.text().trim()
         val episode = this.selectFirst(".pic_text")?.text()?.trim()
         return CartoonCoverImpl(

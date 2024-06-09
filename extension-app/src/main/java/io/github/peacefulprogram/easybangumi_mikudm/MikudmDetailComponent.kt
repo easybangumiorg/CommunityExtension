@@ -15,6 +15,7 @@ import org.jsoup.Jsoup
 
 class MikudmDetailComponent(
     private val okhttpHelper: OkhttpHelper,
+    private val mikudmUtil: MikudmUtil,
 ) : ComponentWrapper(), DetailedComponent {
     override suspend fun getAll(summary: CartoonSummary): SourceResult<Pair<Cartoon, List<PlayLine>>> =
         withResult(Dispatchers.IO) {
@@ -34,20 +35,20 @@ class MikudmDetailComponent(
     private fun getVideoDetail(videoId: String): Pair<Cartoon, List<PlayLine>> {
         val document =
             Jsoup.parse(
-                MikudmUtil.getDocument(okhttpHelper, "/index.php/vod/detail/id/$videoId.html"),
-                MikudmUtil.BASE_URL
+                mikudmUtil.getDocument(okhttpHelper, "/index.php/vod/detail/id/$videoId.html"),
+                mikudmUtil.BASE_URL
             )
         val detailContainer = document.selectFirst(".detail_list")!!
         val videoTitle = detailContainer.selectFirst(".content_detail .title")!!.text().trim()
 
         val desc = detailContainer.selectFirst(".desc")?.text()
         val coverUrl = detailContainer.selectFirst(".vodlist_thumb")?.run {
-            MikudmUtil.extractImageSrc(this)
+            mikudmUtil.extractImageSrc(this)
         }
         val cartoon = CartoonImpl(
             id = videoId,
             source = source.key,
-            url = "${MikudmUtil.BASE_URL}/index.php/vod/detail/id/$videoId.html",
+            url = "${mikudmUtil.BASE_URL}/index.php/vod/detail/id/$videoId.html",
             title = videoTitle,
             coverUrl = coverUrl,
             description = desc

@@ -10,6 +10,8 @@ import com.heyanle.easybangumi4.source_api.entity.Episode
 import com.heyanle.easybangumi4.source_api.entity.PlayLine
 import com.heyanle.easybangumi4.source_api.entity.PlayerInfo
 import com.heyanle.easybangumi4.source_api.utils.api.OkhttpHelper
+import com.heyanle.easybangumi4.source_api.utils.api.WebViewHelper
+import com.heyanle.easybangumi4.source_api.utils.core.SourceUtils
 import com.heyanle.easybangumi4.source_api.withResult
 import kotlinx.coroutines.Dispatchers
 import javax.crypto.Cipher
@@ -17,18 +19,28 @@ import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 class MikudmPlayComponent(
-    private val okhttpHelper: OkhttpHelper
+    private val okhttpHelper: OkhttpHelper,
+    private val mikudmUtil: MikudmUtil,
+    private val webViewHelper: WebViewHelper,
 ) : ComponentWrapper(), PlayComponent {
     override suspend fun getPlayInfo(
         summary: CartoonSummary,
         playLine: PlayLine,
         episode: Episode,
     ): SourceResult<PlayerInfo> = withResult(Dispatchers.IO) {
+//        val url = SourceUtils.urlParser(mikudmUtil.BASE_URL, "/index.php/vod/play/id/${summary.id}/sid/${playLine.id}/nid/${(episode.id.toIntOrNull() ?: episode.order) + 1}.html")
+//        val playerUrl = webViewHelper.interceptResource(
+//            url,
+//            "https://json.mmiku.net/jsonapi.php?.*",
+//            userAgentString = mikudmUtil.USER_AGENT
+//        )
+
+
         val html =
-            MikudmUtil.getDocument(okhttpHelper, "/index.php/vod/play/id/${summary.id}/sid/${playLine.id}/nid/${(episode.id.toIntOrNull() ?: episode.order) + 1}.html")
+            mikudmUtil.getDocument(okhttpHelper, "/index.php/vod/play/id/${summary.id}/sid/${playLine.id}/nid/${(episode.id.toIntOrNull() ?: episode.order) + 1}.html")
         val newHtml =
-            MikudmUtil.getDocument(
-                okhttpHelper, "https://bf.sbdm.cc/m3u8.php?url=" + extractPlayerParam(
+            mikudmUtil.getDocument(
+                okhttpHelper, "${mikudmUtil.BASE_M3U8_URL}/m3u8.php?url=" + extractPlayerParam(
                     html
                 )
             )
@@ -44,7 +56,7 @@ class MikudmPlayComponent(
             doFinal(Base64.decode(encryptedUrl, Base64.DEFAULT))
         }.toString(Charsets.UTF_8)
         PlayerInfo(uri = plainUrl, decodeType = PlayerInfo.DECODE_TYPE_HLS).apply {
-            header = mapOf("referer" to "https://bf.sbdm.cc/")
+            header = mapOf("User-Agent" to mikudmUtil.USER_AGENT)
         }
     }
 

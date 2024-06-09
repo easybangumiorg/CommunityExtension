@@ -1,6 +1,7 @@
 package io.github.peacefulprogram.easybangumi_mxdm
 
 
+import android.util.Log
 import com.heyanle.easybangumi4.source_api.component.ComponentWrapper
 import com.heyanle.easybangumi4.source_api.component.page.PageComponent
 import com.heyanle.easybangumi4.source_api.component.page.SourcePage
@@ -21,7 +22,9 @@ class MxdmPageComponent(
         val pages = mutableListOf<SourcePage>()
         val homePage = SourcePage.Group("首页", false) {
             withResult(Dispatchers.IO) {
-                parseHomePage(Jsoup.parse(mxdmUtil.getDocument( "/"), mxdmUtil.baseUrl))
+                parseHomePage(Jsoup.parse(mxdmUtil.getDocument( "/").apply {
+                                                                           Log.i("MxdmPageComponent", this)
+                }, mxdmUtil.baseUrl))
             }
         }
         pages.add(homePage)

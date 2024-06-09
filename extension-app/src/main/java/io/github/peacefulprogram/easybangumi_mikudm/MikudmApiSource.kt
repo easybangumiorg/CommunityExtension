@@ -26,6 +26,8 @@ class MikudmApiSource : Source, ExtensionIconSource {
             MikudmSearchComponent::class,
             MikudmDetailComponent::class,
             MikudmPlayComponent::class,
+            MikudmPreferenceComponent::class,
+            MikudmUtil::class
         )
     }
 }
